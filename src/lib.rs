@@ -31,6 +31,8 @@ pub enum Error {
     Hyper(HyperError),
 }
 
+pub type Result<T> = ::std::result::Result<T, Error>;
+
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match *self {
@@ -74,7 +76,7 @@ pub struct Response {
 }
 
 impl Response {
-    fn from_hyper_response(mut hyper_response: HyperResponse) -> Result<Response, IoError> {
+    fn from_hyper_response(mut hyper_response: HyperResponse) -> ::std::result::Result<Response, IoError> {
         let mut body = String::new();
         hyper_response.read_to_string(&mut body).map(|_| {
             Response {
@@ -86,7 +88,7 @@ impl Response {
 
     /// Deserializes the body of the response from JSON into
     /// a `T`.
-    pub fn from_json<T: Deserialize>(&self) -> Result<T, Error> {
+    pub fn from_json<T: Deserialize>(&self) -> Result<T> {
         serde_json::from_str(&*self.body).map_err(|e| Error::Json(e))
     }
 }
@@ -176,7 +178,7 @@ impl Request {
         self
     }
 
-    fn send_request(&mut self, mut req: HyperRequest<Fresh>) -> Result<Response, Error> {
+    fn send_request(&mut self, mut req: HyperRequest<Fresh>) -> Result<Response> {
         if let Some(headers) = self.headers.as_ref() {
             req.headers_mut().extend(headers.iter());
         }
@@ -201,7 +203,7 @@ impl Request {
 
     /// Sends a GET request and returns either an error
     /// or a `String` of the response.
-    pub fn get(&mut self) -> Result<Response, Error> {
+    pub fn get(&mut self) -> Result<Response> {
         let mut url = self.url.clone();
 
         if let Some(ref params) = self.params {
@@ -214,7 +216,7 @@ impl Request {
 
     /// Sends a DELETE request and returns either an error
     /// or a `String` of the response.
-    pub fn delete(&mut self) -> Result<Response, Error> {
+    pub fn delete(&mut self) -> Result<Response> {
         let mut url = self.url.clone();
 
         if let Some(ref params) = self.params {
@@ -227,7 +229,7 @@ impl Request {
 
     /// Sends a POST request and returns either an error
     /// or a `String` of the response.
-    pub fn post(&mut self) -> Result<Response, Error> {
+    pub fn post(&mut self) -> Result<Response> {
         let url = self.url.clone();
 
         if let Some(ref params) = self.params {
@@ -242,7 +244,7 @@ impl Request {
 
     /// Sends a PUT request and returns either an error
     /// or a `String` of the response.
-    pub fn put(&mut self) -> Result<Response, Error> {
+    pub fn put(&mut self) -> Result<Response> {
         let url = self.url.clone();
 
         if let Some(ref params) = self.params {
