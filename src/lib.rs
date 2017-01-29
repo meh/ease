@@ -118,7 +118,10 @@ impl Request {
     /// be stored in the URL. On a POST or PUT request, it is stored in the
     /// body of the request. Hence, if you call this method on a POST or
     /// PUT request, you cannot also call `body`.
-    pub fn param<S>(&mut self, key: S, value: S) -> &mut Request where S: Into<String> {
+    pub fn param<K, V>(&mut self, key: K, value: V) -> &mut Request
+        where K: Into<String>,
+              V: Into<String>
+    {
         if let Some(ref mut p) = self.params {
             p.push((key.into(), value.into()));
         } else {
@@ -133,9 +136,10 @@ impl Request {
     /// be stored in the URL. On a POST or PUT request, they are stored in the
     /// body of the request. Hence, if you call this method on a POST or
     /// PUT request, you cannot also call `body`.
-    pub fn params<S, T>(&mut self, values: T) -> &mut Request
-        where S: Into<String>,
-              T: IntoIterator<Item = (S, S)>
+    pub fn params<K, V, T>(&mut self, values: T) -> &mut Request
+        where K: Into<String>,
+              V: Into<String>,
+              T: IntoIterator<Item = (K, V)>
     {
         if let Some(ref mut p) = self.params {
             for value in values {
@@ -153,8 +157,8 @@ impl Request {
 
     /// Writes a `String` to the body of the request. Don't call this
     /// method if you also call `param` on a PUT or POST request.
-    pub fn body(&mut self, body: String) -> &mut Request {
-        self.body = Some(body);
+    pub fn body<S: Into<String>>(&mut self, body: S) -> &mut Request {
+        self.body = Some(body.into());
         self
     }
 
