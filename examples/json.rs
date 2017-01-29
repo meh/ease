@@ -1,5 +1,5 @@
-#![feature(custom_derive, plugin)]
-#![plugin(serde_macros)]
+#[macro_use]
+extern crate serde_derive;
 
 extern crate ease;
 
